@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gomoku Master - Play Five in a Row vs AI | Strategy Board Game</title>
+    <meta name="description" content="Play Gomoku online for free. Challenge AI in this classic Five in a Row strategy game with 3 difficulty levels. Learn professional strategies and game history.">
+    <link rel="canonical" href="https://gomokumaster.io/">
+    <!-- Open Graph tags for social sharing -->
+    <meta property="og:title" content="Gomoku Master - Play Five in a Row Online">
+    <meta property="og:description" content="Challenge AI in this classic East Asian strategy board game. Free to play, no registration required.">
+    <meta property="og:url" content="https://gomokumaster.io/">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="https://gomokumaster.io/images/gomoku-preview.jpg">
+    <!-- Favicon -->
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <style>
+        /* CSS Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        /* Main Color Scheme - Traditional */
+        :root {
+            --primary-color: #2B2B2B;    /* Board Black */
+            --secondary-color: #F3EADA;  /* Parchment Yellow */
+            --accent-color: #BF9270;     /* Sandalwood Brown */
+            --text-color: #333333;
+            --light-text: #F5F5F7;
+            --border-radius: 8px;
+            --container-width: 1200px;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--secondary-color);
+            padding: 0;
+            margin: 0;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: var(--container-width);
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: var(--primary-color);
+            color: var(--light-text);
+            padding: 1.5rem 0;
+            box-shadow: var(--shadow);
+        }
+        
+        .site-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 10px;
+            background-color: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-left: 1.5rem;
+        }
+        
+        nav ul li a {
+            color: var(--light-text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+        
+        nav ul li a:hover {
+            color: var(--accent-color);
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 3rem 0;
+            background-color: var(--primary-color);
+            color: var(--light-text);
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--light-text);
+        }
+        
+        .hero-description {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto 2rem;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: var(--light-text);
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: var(--border-radius);
+            transition: background-color 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            background-color: #A67B59;
+        }
+        
+        /* Game Section */
+        .game-section {
+            padding: 3rem 0;
+            background-color: var(--secondary-color);
+        }
+        
+        .game-container {
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+        
+        .game-iframe-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%; /* 1:1 Aspect Ratio */
+            overflow: hidden;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            border: 2px solid var(--primary-color);
+            background-color: var(--secondary-color);
+            margin: 2rem auto;
+            max-width: 600px;
+        }
+        
+        .game-iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        
+        .stone-place-area {
+            padding: 15px; /* Touch target expansion */
+            touch-action: manipulation;
+        }
+        
+        /* Content Sections */
+        .content-section {
+            padding: 3rem 0;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            border-bottom: 3px solid var(--accent-color);
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+        
+        .history-section {
+            background-color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+        
+        .strategy-section {
+            background-color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+        
+        .comparison-section {
+            background-color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+        
+        .strategy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .strategy-card {
+            background-color: var(--secondary-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .strategy-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+        
+        /* Comparison Table */
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1.5rem;
+        }
+        
+        .comparison-table th, .comparison-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .comparison-table th {
+            background-color: var(--primary-color);
+            color: var(--light-text);
+        }
+        
+        .comparison-table tr:nth-child(even) {
+            background-color: #f7f7f7;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--primary-color);
+            color: var(--light-text);
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        
+        .footer-column {
+            flex: 1;
+            min-width: 250px;
+            margin-bottom: 1.5rem;
+        }
+        
+        .footer-column h3 {
+            color: var(--accent-color);
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column ul li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-column ul li a {
+            color: var(--light-text);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-column ul li a:hover {
+            color: var(--accent-color);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 1.5rem;
+            margin-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        /* Mobile Menu */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--light-text);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        /* Media Queries for Responsive Design */
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: block;
+            }
+            
+            .desktop-menu {
+                display: none;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background-color: var(--primary-color);
+                padding: 1rem 0;
+                box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+                z-index: 100;
+            }
+            
+            .desktop-menu.show {
+                display: block;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            nav ul li {
+                margin: 0.5rem 0;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            h2 {
+                font-size: 1.7rem;
+            }
+            
+            .game-iframe-container {
+                padding-bottom: 100%; /* Keep 1:1 aspect ratio */
+                max-width: 100%;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+            }
+            
+            .footer-column {
+                width: 100%;
+                margin-bottom: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container site-header">
+            <div class="logo">
+                <div class="logo-icon">G</div>
+                GomokuMaster
+            </div>
+            <button class="mobile-menu-toggle">☰</button>
+            <nav class="desktop-menu">
+                <ul>
+                    <li><a href="#game">Play Game</a></li>
+                    <li><a href="#history">History</a></li>
+                    <li><a href="#strategy">Strategy</a></li>
+                    <li><a href="#comparison">Rules</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <section class="hero">
+        <div class="container">
+            <h1>Gomoku Master - Play Five in a Row vs AI</h1>
+            <p class="hero-description">Gomoku, known as Five in a Row, is a 2,000-year-old Chinese strategy game where players compete to place five stones consecutively on a 15x15 grid. Now challenge AI with 3 difficulty levels.</p>
+            <a href="#game" class="cta-button">Play Now</a>
+        </div>
+    </section>
+    
+    <section id="game" class="game-section">
+        <div class="container">
+            <div class="game-container">
+                <div class="game-iframe-container">
+                    <iframe src="https://snowrider97.github.io/go/lords-of-gomoku.html" allowfullscreen allow="fullscreen" sandbox="allow-scripts allow-same-origin allow-popups allow-forms"></iframe>
+                </div>
+                <p>Choose your difficulty level and place your stones strategically to form a row of five. Be the first to connect five stones horizontally, vertically, or diagonally to win!</p>
+            </div>
+        </div>
+    </section>
+    
+    <section class="content-section">
+        <div class="container">
+            <div class="history-section">
+                <h2 id="history">Ancient Strategy Game from East Asia</h2>
+                <p>Gomoku originated in China over 2,000 years ago during the Han Dynasty, where it was known as "Wu Zi Qi" (Five Stone Game). The game spread throughout East Asia, gaining popularity in Japan during the Heian period where it got its current name: "Gomoku" (五目 - literally "five points").</p>
+                <p>Throughout history, Gomoku has been played by people from all walks of life - from emperors and scholars to farmers and merchants. Its simple rules yet complex strategy made it accessible to everyone while remaining challenging for even the most dedicated players.</p>
+                <p>Today, Gomoku is played worldwide and has evolved into a competitive sport with international tournaments. The game's enduring appeal lies in its perfect balance of simplicity and depth - easy to learn, yet requiring significant practice to master.</p>
+            </div>
+            
+            <div class="strategy-section">
+                <h2 id="strategy">How to Win in 7 Moves (Pro Tips)</h2>
+                <p>Professional Gomoku players use established opening patterns and defensive techniques. Here are some expert strategies to improve your game:</p>
+                <div class="strategy-grid">
+                    <div class="strategy-card">
+                        <h3>Opening Strategy</h3>
+                        <p>Begin by placing stones near the center of the board to maximize your potential directions of attack. Avoid placing your first stones at the exact center as this gives your opponent more counter-play options.</p>
+                    </div>
+                    <div class="strategy-card">
+                        <h3>Create Threats</h3>
+                        <p>The key to winning is creating multiple threats simultaneously. Form "open threes" (three stones in a row with empty spaces on both ends) which force your opponent to defend, allowing you to take initiative.</p>
+                    </div>
+                    <div class="strategy-card">
+                        <h3>Block Opponent's Progress</h3>
+                        <p>Always prioritize blocking your opponent's four-in-a-row threats. However, be careful not to focus solely on defense - balance blocking with creating your own attacking opportunities.</p>
+                    </div>
+                    <div class="strategy-card">
+                        <h3>Double-Three Technique</h3>
+                        <p>Under professional rules, creating multiple "three in a row" patterns simultaneously (double-three) is restricted. However, understanding these patterns helps you recognize potential winning positions and threats.</p>
+                    </div>
+                </div>
+                <p class="strategy-note">Note: Professional rules enforce 'double-three ban' to prevent easy wins.</p>
+            </div>
+            
+            <div class="comparison-section">
+                <h2 id="comparison">Gomoku vs 围棋: Rule Differences</h2>
+                <p>While Gomoku and Go (围棋/Weiqi) are both played on a grid board with black and white stones, they have fundamentally different objectives and rules:</p>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Feature</th>
+                            <th>Gomoku (五目)</th>
+                            <th>Go (围棋/Weiqi)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Objective</td>
+                            <td>Connect five stones in a row</td>
+                            <td>Control territory on the board</td>
+                        </tr>
+                        <tr>
+                            <td>Stone Placement</td>
+                            <td>Stones remain fixed once placed</td>
+                            <td>Stones can be captured and removed</td>
+                        </tr>
+                        <tr>
+                            <td>Board Size</td>
+                            <td>Typically 15×15 grid</td>
+                            <td>Typically 19×19 grid</td>
+                        </tr>
+                        <tr>
+                            <td>Game Length</td>
+                            <td>Relatively short (5-20 minutes)</td>
+                            <td>Often longer (30-90+ minutes)</td>
+                        </tr>
+                        <tr>
+                            <td>Complexity</td>
+                            <td>Moderate strategic depth</td>
+                            <td>Extremely high strategic depth</td>
+                        </tr>
+                        <tr>
+                            <td>Professional Rules</td>
+                            <td>Often includes opening move restrictions</td>
+                            <td>Uses komi (compensation points) system</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </section>
+    
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>GomokuMaster.io</h3>
+                    <p>The premier destination for playing Gomoku online against AI opponents of varying difficulties. Perfect your strategy and become a master of this ancient board game.</p>
+                </div>
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul>
+                        <li><a href="#game">Play Game</a></li>
+                        <li><a href="#history">Game History</a></li>
+                        <li><a href="#strategy">Pro Strategies</a></li>
+                        <li><a href="#comparison">Game Rules</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul>
+                        <li><a href="#">Beginners Guide</a></li>
+                        <li><a href="#">Advanced Techniques</a></li>
+                        <li><a href="#">Tournament Rules</a></li>
+                        <li><a href="#">Community Forum</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 GomokuMaster.io. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Mobile menu toggle
+        document.querySelector('.mobile-menu-toggle').addEventListener('click', function() {
+            document.querySelector('.desktop-menu').classList.toggle('show');
+        });
+        
+        // Close mobile menu when clicking on a link
+        const navLinks = document.querySelectorAll('.desktop-menu a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', function() {
+                document.querySelector('.desktop-menu').classList.remove('show');
+            });
+        });
+    </script>
+</body>
+</html>
